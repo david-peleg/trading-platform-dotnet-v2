@@ -15,33 +15,44 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingPlatform.Tests", "Tr
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Docs", "Docs", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
 	ProjectSection(SolutionItems) = preProject
-		DatabaseGuidelines.md = DatabaseGuidelines.md
+		Docs\00_README_PROJECT.md = Docs\00_README_PROJECT.md
+		Docs\DatabaseGuidelines.md = Docs\DatabaseGuidelines.md
 		Docs\GPT_New_Project_Setup_v1.docx = Docs\GPT_New_Project_Setup_v1.docx
 		Docs\GPT_Project_Guide_v1.docx = Docs\GPT_Project_Guide_v1.docx
-		SecurityPolicy.md = SecurityPolicy.md
+		Docs\SecurityPolicy.md = Docs\SecurityPolicy.md
 		Docs\TradingPlatformNET8v2_ProjectCharter_v1.docx = Docs\TradingPlatformNET8v2_ProjectCharter_v1.docx
 		Docs\TradingPlatformNET8v2_RepoSkeleton_Checklists_v1.docx = Docs\TradingPlatformNET8v2_RepoSkeleton_Checklists_v1.docx
 		Docs\TradingPlatformNET8v2_Workflow_PromptPlaybook_v1.docx = Docs\TradingPlatformNET8v2_Workflow_PromptPlaybook_v1.docx
 		Docs\TradingPlatformNET8_HLD_v0.2.docx = Docs\TradingPlatformNET8_HLD_v0.2.docx
+		Docs\TradingPlatformNET8_HLD_v0.2.md = Docs\TradingPlatformNET8_HLD_v0.2.md
 		Docs\TradingPlatformNET8_TAD_v0.2.docx = Docs\TradingPlatformNET8_TAD_v0.2.docx
+		Docs\TradingPlatformNET8_TAD_v0.2.md = Docs\TradingPlatformNET8_TAD_v0.2.md
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prompts", "prompts", "{DE36856F-F1B3-4441-A30C-DC046DFE2C1D}"
 	ProjectSection(SolutionItems) = preProject
-		PromptsIndex.md = PromptsIndex.md
-		system_prompt.md = system_prompt.md
-		task_template.md = task_template.md
-		Docs\TradingPlatformNET8_PromptsIndex_v0.2.pdf = Docs\TradingPlatformNET8_PromptsIndex_v0.2.pdf
+		prompts\PromptsIndex.md = prompts\PromptsIndex.md
+		prompts\system_prompt.md = prompts\system_prompt.md
+		prompts\task_template.md = prompts\task_template.md
+		prompts\TradingPlatformNET8_PromptsIndex_v0.2.pdf = prompts\TradingPlatformNET8_PromptsIndex_v0.2.pdf
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "db", "db", "{6A895A35-AA16-4024-8002-893CEB910E1A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddl", "ddl", "{D75BB8DE-A553-4821-B240-3F94CF58DA46}"
 	ProjectSection(SolutionItems) = preProject
-		.gitkeep = .gitkeep
+		db\ddl\.gitkeep = db\ddl\.gitkeep
+		db\ddl\001_symbols_table.sql = db\ddl\001_symbols_table.sql
+		db\ddl\002_types.sql = db\ddl\002_types.sql
 	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sp", "sp", "{71E725AC-16CF-4EDA-B37F-F909D260B26E}"
+	ProjectSection(SolutionItems) = preProject
+		db\sp\.gitkeep = db\sp\.gitkeep
+		db\sp\Symbols_GetAll.sql = db\sp\Symbols_GetAll.sql
+		db\sp\Symbols_Search.sql = db\sp\Symbols_Search.sql
+		db\sp\Symbols_UpsertBulk.sql = db\sp\Symbols_UpsertBulk.sql
+	EndProjectSection
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
