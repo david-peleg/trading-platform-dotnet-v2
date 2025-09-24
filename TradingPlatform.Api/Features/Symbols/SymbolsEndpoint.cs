@@ -1,6 +1,7 @@
 ﻿// src/TradingPlatform.Api/Features/Symbols/SymbolsEndpoint.cs
 using Carter;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using TradingPlatform.Domain.Symbols;
 using TradingPlatform.Infrastructure.Symbols;
 
@@ -11,12 +12,17 @@ public sealed class SymbolsEndpoint : ICarterModule
 {
     public void AddRoutes(IEndpointRouteBuilder app)
     {
-        app.MapPost("/ingestion/symbols/seed", async (IEnumerable<SeedSymbolDto> body, ISymbolRegistry registry, CancellationToken ct) =>
-        {
-            var items = body.Select(d => new Symbol(d.Symbol, d.Name, d.Exchange, d.Country, d.Sector, d.IsActive)).ToList();
-            await registry.UpsertAsync(items, ct);
-            return Results.NoContent();
-        });
+        // using Microsoft.AspNetCore.Mvc;  // הוסף using זה למעלה
+        app.MapPost("/ingestion/symbols/seed",
+            async ([FromBody] SeedSymbolDto[] body, ISymbolRegistry registry, CancellationToken ct) =>
+            {
+                if (body is null || body.Length == 0) return Results.BadRequest("empty body");
+
+                var items = body.Select(d => new Symbol(d.Symbol, d.Name, d.Exchange, d.Country, d.Sector, d.IsActive));
+                await registry.UpsertAsync(items, ct);
+                return Results.NoContent();
+            });
+
 
         app.MapGet("/symbols", async (string? exchange, int? take, ISymbolRegistry registry, CancellationToken ct) =>
         {
