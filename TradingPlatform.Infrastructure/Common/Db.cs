@@ -7,7 +7,7 @@ using Microsoft.Extensions.Configuration;
 namespace TradingPlatform.Infrastructure.Common;
 
 /// <summary>Small helper to run stored procedures with Dapper.</summary>
-public sealed class Db
+public sealed class Db : IDb
 {
     private readonly string _cs;
 
