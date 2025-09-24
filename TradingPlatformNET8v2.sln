@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
-VisualStudioVersion = 17.14.36408.4 d17.14
+VisualStudioVersion = 17.14.36408.4
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TradingPlatform.Api", "TradingPlatform.Api\TradingPlatform.Api.csproj", "{5D1A12EC-C1F8-453C-965C-E6E2BC821AA4}"
 EndProject
@@ -37,28 +37,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "prompts", "prompts", "{DE36
 		prompts\TradingPlatformNET8_PromptsIndex_v0.2.pdf = prompts\TradingPlatformNET8_PromptsIndex_v0.2.pdf
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "db", "db", "{6A895A35-AA16-4024-8002-893CEB910E1A}"
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "ddl", "ddl", "{D75BB8DE-A553-4821-B240-3F94CF58DA46}"
-	ProjectSection(SolutionItems) = preProject
-		db\ddl\.gitkeep = db\ddl\.gitkeep
-		db\ddl\001_symbols_table.sql = db\ddl\001_symbols_table.sql
-		db\ddl\002_types.sql = db\ddl\002_types.sql
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "sp", "sp", "{71E725AC-16CF-4EDA-B37F-F909D260B26E}"
-	ProjectSection(SolutionItems) = preProject
-		db\sp\.gitkeep = db\sp\.gitkeep
-		db\sp\Symbols_GetAll.sql = db\sp\Symbols_GetAll.sql
-		db\sp\Symbols_Search.sql = db\sp\Symbols_Search.sql
-		db\sp\Symbols_UpsertBulk.sql = db\sp\Symbols_UpsertBulk.sql
-	EndProjectSection
-EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{8EC462FD-D22E-90A8-E5CE-7E832BA40C5D}"
 	ProjectSection(SolutionItems) = preProject
 		Directory.Build.props = Directory.Build.props
 		README.md = README.md
 	EndProjectSection
+EndProject
+Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "db", "db\db.sqlproj", "{A2847D5A-88A8-48B1-AC84-CFC2619246AA}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -86,13 +71,14 @@ Global
 		{33279BA7-9DE9-40E4-970F-B4969EF12BF4}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33279BA7-9DE9-40E4-970F-B4969EF12BF4}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{33279BA7-9DE9-40E4-970F-B4969EF12BF4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2847D5A-88A8-48B1-AC84-CFC2619246AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A2847D5A-88A8-48B1-AC84-CFC2619246AA}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{A2847D5A-88A8-48B1-AC84-CFC2619246AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A2847D5A-88A8-48B1-AC84-CFC2619246AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A2847D5A-88A8-48B1-AC84-CFC2619246AA}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
-	EndGlobalSection
-	GlobalSection(NestedProjects) = preSolution
-		{D75BB8DE-A553-4821-B240-3F94CF58DA46} = {6A895A35-AA16-4024-8002-893CEB910E1A}
-		{71E725AC-16CF-4EDA-B37F-F909D260B26E} = {6A895A35-AA16-4024-8002-893CEB910E1A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {64906326-3876-4B09-904D-5B41A2BCCE00}

@@ -11,7 +11,11 @@
 
 	<ItemGroup>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
-		<PackageReference Include="Carter" Version="8.2.0" />
+		<!-- Carter ללא אנלייזרים -->
+		<PackageReference Include="Carter" Version="8.2.0">
+			<IncludeAssets>runtime; build; native; contentfiles; compile</IncludeAssets>
+			<ExcludeAssets>analyzers</ExcludeAssets>
+		</PackageReference>
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
 	</ItemGroup>
 
@@ -21,7 +25,7 @@
 		<ProjectReference Include="..\TradingPlatform.Infrastructure\TradingPlatform.Infrastructure.csproj" />
 	</ItemGroup>
 
-	<!-- לא להעתיק מסמכי Docs/prompts ל-output/publish -->
+	<!-- לא להעתיק מסמכי Docs/prompts/db ל-output/publish -->
 	<ItemGroup>
 		<None Update="..\Docs\**\*;..\prompts\**\*;..\db\**\*">
 			<CopyToOutputDirectory>Never</CopyToOutputDirectory>
