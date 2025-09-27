@@ -1,18 +1,23 @@
 ﻿// src/TradingPlatform.Infrastructure/Symbols/SqlSymbolRegistry.cs
+using System.Collections.Immutable;
 using System.Data;
+using System.Text.RegularExpressions;
+using Dapper;
 using Microsoft.Data.SqlClient;
 using Microsoft.Extensions.Logging;
 using TradingPlatform.Domain.Symbols;
 using TradingPlatform.Infrastructure.Common;
-using Dapper;
 
 namespace TradingPlatform.Infrastructure.Symbols;
 
-/// <summary>SQL implementation (SP-only) of ISymbolRegistry.</summary>
+/// <summary>SQL implementation (SP-only) of ISymbolRegistry with in-memory cache for fast matching.</summary>
 public sealed class SqlSymbolRegistry : ISymbolRegistry
 {
     private readonly Db _db;
     private readonly ILogger<SqlSymbolRegistry> _logger;
+
+    // In-memory cache of active symbols for matching.
+    private ImmutableArray<Symbol> _cache = ImmutableArray<Symbol>.Empty;
 
     public SqlSymbolRegistry(Db db, ILogger<SqlSymbolRegistry> logger)
     {
@@ -40,18 +45,83 @@ public sealed class SqlSymbolRegistry : ISymbolRegistry
         cmd.Parameters.Add(p);
 
         _ = await cmd.ExecuteNonQueryAsync(ct);
+
+        // Refresh cache with the latest active set we just upserted.
+        // Keep only active ones to reduce noise in matching.
+        _cache = items.Where(s => s.IsActive).ToImmutableArray();
     }
 
     public async Task<IReadOnlyList<Symbol>> GetAllAsync(string? exchange, int take, CancellationToken ct)
     {
         var rows = await _db.QueryAsync<SymbolRow>("dbo.Symbols_GetAll", new { Exchange = exchange, Take = take }, ct);
-        return rows.Select(Map).ToList();
+        var list = rows.Select(Map).ToList();
+
+        // If cache is empty, initialize it lazily from DB call.
+        if (_cache.IsDefaultOrEmpty)
+            _cache = list.Where(s => s.IsActive).ToImmutableArray();
+
+        return list;
     }
 
     public async Task<IReadOnlyList<Symbol>> SearchAsync(string query, int take, CancellationToken ct)
     {
         var rows = await _db.QueryAsync<SymbolRow>("dbo.Symbols_Search", new { Query = query, Take = take }, ct);
         return rows.Select(Map).ToList();
+    }
+
+    /// <summary>
+    /// Heuristics:
+    /// 1) Ticker in parentheses, e.g. "(AAPL)".
+    /// 2) Whole-word ticker match against active symbols.
+    /// 3) Fallback: company-name substring match.
+    /// </summary>
+    public async Task<string?> TryMatchAsync(string text, CancellationToken ct)
+    {
+        if (string.IsNullOrWhiteSpace(text))
+            return null;
+
+        // Ensure cache is warm (lazy-load a reasonable batch if empty).
+        if (_cache.IsDefaultOrEmpty)
+        {
+            try
+            {
+                _ = await GetAllAsync(exchange: null, take: 5000, ct);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogWarning(ex, "Failed warming symbol cache; continuing with empty cache.");
+            }
+        }
+
+        var snapshot = _cache;
+        if (snapshot.IsDefaultOrEmpty) return null;
+
+        // 1) (TICKER)
+        var m = Regex.Match(text, @"\(([A-Z]{1,10})\)");
+        if (m.Success)
+        {
+            var t = m.Groups[1].Value;
+            if (snapshot.Any(s => s.SymbolCode.Equals(t, StringComparison.OrdinalIgnoreCase)))
+                return t;
+        }
+
+        // 2) whole-word ticker
+        foreach (var s in snapshot)
+        {
+            var pattern = $@"\b{Regex.Escape(s.SymbolCode)}\b";
+            if (Regex.IsMatch(text, pattern, RegexOptions.IgnoreCase))
+                return s.SymbolCode;
+        }
+
+        // 3) company name fragment (coarse)
+        foreach (var s in snapshot)
+        {
+            if (!string.IsNullOrWhiteSpace(s.Name) &&
+                text.Contains(s.Name, StringComparison.OrdinalIgnoreCase))
+                return s.SymbolCode;
+        }
+
+        return null;
     }
 
     private static Symbol Map(SymbolRow r) =>

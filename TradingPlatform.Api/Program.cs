@@ -1,43 +1,49 @@
 ﻿// src/TradingPlatform.Api/Program.cs
 using Carter;
 using TradingPlatform.Application.Prices;
+using TradingPlatform.Application.News;
+using TradingPlatform.Domain.Ingestion;
 using TradingPlatform.Infrastructure.Common;
 using TradingPlatform.Infrastructure.Prices;
 using TradingPlatform.Infrastructure.Symbols;
+using TradingPlatform.Infrastructure.News;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // === Services (DI) ===
 builder.Services.AddCarter();
 
-// DB helper: נרשום גם כ-IDb וגם כ-Db (יש טיפוסים שדורשים את הקונקרטי)
+// DB helper
 builder.Services.AddSingleton<IDb, Db>();
-builder.Services.AddSingleton<Db>(sp => (Db)sp.GetRequiredService<IDb>());
+builder.Services.AddSingleton(sp => (Db)sp.GetRequiredService<IDb>());
 
-// Symbols registry (Prompt 1)
+// Symbols (Prompt 1)
 builder.Services.AddSingleton<ISymbolRegistry, SqlSymbolRegistry>();
 
-// Prices (Prompt 2): בחירה לפי קונפיג
+// Prices (Prompt 2)
 var dbMode = builder.Configuration["Db:Mode"] ?? "Real";
 if (string.Equals(dbMode, "Noop", StringComparison.OrdinalIgnoreCase))
-{
     builder.Services.AddSingleton<IPriceRepository, NoopPriceRepository>();
-}
 else
-{
     builder.Services.AddSingleton<IPriceRepository, SqlPriceRepository>();
-}
 builder.Services.AddSingleton<IPriceDataSource, DummyPriceDataSource>();
-
-// Jobs
 builder.Services.AddSingleton<PricesBackfillJob>();
 builder.Services.AddSingleton<PricesDailyJob>();
-var enableDaily = builder.Configuration.GetValue("Prices:EnableDailyJob", true);
-if (enableDaily)
-{
-    // hosted service מאותו Singleton
+if (builder.Configuration.GetValue("Prices:EnableDailyJob", true))
     builder.Services.AddHostedService(sp => sp.GetRequiredService<PricesDailyJob>());
-}
+
+// News (Prompt 3)
+builder.Services.Configure<IngestionOptions>(builder.Configuration.GetSection(IngestionOptions.SectionName));
+builder.Services.AddHttpClient(nameof(RssNewsSource)).SetHandlerLifetime(TimeSpan.FromMinutes(5));
+builder.Services.AddSingleton<INewsRepository>(sp =>
+    new SqlNewsRepository(builder.Configuration.GetConnectionString("TradingPlatformNet8")!));
+builder.Services.AddSingleton<INewsSource, RssNewsSource>();
+builder.Services.AddSingleton<NewsIngestionUseCase>();
+builder.Services.AddSingleton<NewsBackfillJob>();
+
+var enableNewsDaily = builder.Configuration.GetValue("News:EnableDailyJob", false); // default=false
+if (enableNewsDaily)
+    builder.Services.AddHostedService<NewsDailyJob>();
 
 // === App ===
 var app = builder.Build();
