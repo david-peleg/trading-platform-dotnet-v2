@@ -17,6 +17,7 @@
 			<ExcludeAssets>analyzers</ExcludeAssets>
 		</PackageReference>
 		<PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+		<PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
