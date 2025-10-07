@@ -60,7 +60,26 @@ if (builder.Configuration.GetValue("News:EnableDailyJob", false))
 // ---------- Filings (Prompt 4) ----------
 builder.Services.AddSingleton<IFilingsRepository>(sp =>
     new SqlFilingsRepository(builder.Configuration.GetConnectionString("TradingPlatformNet8")!));
-builder.Services.AddSingleton<IFilingsSource, DummyFilingsSource>();
+
+// מקור נתונים: Dummy או Edgar (appsettings: Filings:Source)
+var filingsSource = builder.Configuration["Filings:Source"] ?? "Dummy";
+if (string.Equals(filingsSource, "Edgar", StringComparison.OrdinalIgnoreCase))
+{
+    builder.Services.Configure<EdgarOptions>(builder.Configuration.GetSection(EdgarOptions.SectionName));
+    builder.Services.AddHttpClient(nameof(EdgarRssFilingsSource), (sp, client) =>
+    {
+        var cfg = sp.GetRequiredService<IConfiguration>();
+        var ua = cfg[$"{EdgarOptions.SectionName}:UserAgent"]
+                 ?? "trading-platform-net8/0.1 (contact: your-email@your-domain.com)";
+        client.DefaultRequestHeaders.UserAgent.ParseAdd(ua);
+    });
+    builder.Services.AddSingleton<IFilingsSource, EdgarRssFilingsSource>();
+}
+else
+{
+    builder.Services.AddSingleton<IFilingsSource, DummyFilingsSource>();
+}
+
 builder.Services.AddScoped<FilingsBackfillJob>();
 builder.Services.AddScoped<FilingsDailyJob>();
 if (builder.Configuration.GetValue("Filings:EnableDailyJob", true))
