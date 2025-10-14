@@ -22,12 +22,16 @@ using TradingPlatform.Application.Ingestion;
 using TradingPlatform.Domain.Filings;
 using TradingPlatform.Infrastructure.Filings;
 
+// Analyst (P5)
+using TradingPlatform.Application.Analyst;
+using TradingPlatform.Infrastructure.Analyst;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ========== Services (DI) ==========
 builder.Services.AddCarter();
 
-// DB helper
+// DB helper (abstract)
 builder.Services.AddSingleton<IDb, Db>();
 builder.Services.AddSingleton(sp => (Db)sp.GetRequiredService<IDb>());
 
@@ -61,7 +65,6 @@ if (builder.Configuration.GetValue("News:EnableDailyJob", false))
 builder.Services.AddSingleton<IFilingsRepository>(sp =>
     new SqlFilingsRepository(builder.Configuration.GetConnectionString("TradingPlatformNet8")!));
 
-// מקור נתונים: Dummy או Edgar (appsettings: Filings:Source)
 var filingsSource = builder.Configuration["Filings:Source"] ?? "Dummy";
 if (string.Equals(filingsSource, "Edgar", StringComparison.OrdinalIgnoreCase))
 {
@@ -79,11 +82,29 @@ else
 {
     builder.Services.AddSingleton<IFilingsSource, DummyFilingsSource>();
 }
-
 builder.Services.AddScoped<FilingsBackfillJob>();
 builder.Services.AddScoped<FilingsDailyJob>();
 if (builder.Configuration.GetValue("Filings:EnableDailyJob", true))
     builder.Services.AddHostedService<FilingsDailyWorker>();
+
+// ---------- Analyst (Prompt 5) ----------
+builder.Services.Configure<AnalystOptions>(builder.Configuration.GetSection(AnalystOptions.SectionName));
+builder.Services.AddHttpClient(nameof(FmpAnalystSource)).SetHandlerLifetime(TimeSpan.FromMinutes(5));
+builder.Services.AddHttpClient(nameof(HttpAnalystSource)).SetHandlerLifetime(TimeSpan.FromMinutes(5));
+
+builder.Services.AddSingleton<IAnalystReportsRepository, SqlAnalystReportsRepository>();
+
+var analystSource = builder.Configuration["Analyst:Source"] ?? "Dummy";
+if (string.Equals(analystSource, "Fmp", StringComparison.OrdinalIgnoreCase))
+    builder.Services.AddSingleton<IAnalystSource, FmpAnalystSource>();
+else if (string.Equals(analystSource, "Http", StringComparison.OrdinalIgnoreCase))
+    builder.Services.AddSingleton<IAnalystSource, HttpAnalystSource>();
+else
+    builder.Services.AddSingleton<IAnalystSource, DummyAnalystSource>();
+
+builder.Services.AddSingleton<AnalystIngestionUseCase>();
+builder.Services.AddSingleton<AnalystBackfillJob>();
+builder.Services.AddSingleton<AnalystDailyJob>();
 
 // ========== App ==========
 var app = builder.Build();
