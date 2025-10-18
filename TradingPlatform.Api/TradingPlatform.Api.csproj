@@ -10,6 +10,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <None Include="Features\Attribution\AttributionsEndpoint.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<PackageReference Include="Swashbuckle.AspNetCore" Version="6.6.2" />
 		<!-- Carter ללא אנלייזרים -->
 		<PackageReference Include="Carter" Version="8.2.0">

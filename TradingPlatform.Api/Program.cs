@@ -26,6 +26,10 @@ using TradingPlatform.Infrastructure.Filings;
 using TradingPlatform.Application.Analyst;
 using TradingPlatform.Infrastructure.Analyst;
 
+// Attribution (P6)
+using TradingPlatform.Domain.Attribution;
+using TradingPlatform.Infrastructure.Attributions;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // ========== Services (DI) ==========
@@ -105,6 +109,10 @@ else
 builder.Services.AddSingleton<AnalystIngestionUseCase>();
 builder.Services.AddSingleton<AnalystBackfillJob>();
 builder.Services.AddSingleton<AnalystDailyJob>();
+
+// ---------- Attribution (Prompt 6) ----------
+builder.Services.AddSingleton<IAttributionsRepository, SqlAttributionsRepository>();
+builder.Services.AddSingleton<IAttributionService, AttributionService>();
 
 // ========== App ==========
 var app = builder.Build();
