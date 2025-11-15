@@ -7,5 +7,6 @@ public sealed record Attribution(
     string Symbol,
     short Direction,   // -1/0/+1
     double Confidence, // 0..1
-    short HorizonD     // e.g., 1/7/30/60
+    short HorizonD,    // e.g., 1/7/30/60
+    DateOnly Dt        // date of the attribution (CreatedAt/Pub date)
 );

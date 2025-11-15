@@ -74,7 +74,9 @@ public sealed class AnalystIngestionUseCaseTests
 
         Task<IReadOnlyList<Symbol>> ISymbolRegistry.GetAllAsync(string? exchange, int take, CancellationToken ct)
         {
-            throw new NotImplementedException();
+            // Map our lightweight test rows to the domain Symbol record expected by callers.
+            var list = _rows.Select(r => new Symbol(r.SymbolCode, string.Empty, string.Empty, string.Empty, string.Empty, r.IsActive)).ToList();
+            return Task.FromResult<IReadOnlyList<Symbol>>(list);
         }
     }
 

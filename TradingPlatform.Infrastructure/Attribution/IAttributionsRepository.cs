@@ -8,5 +8,8 @@ public interface IAttributionsRepository
 
     Task<IReadOnlyList<Attribution>> GetBySymbolAsync(string symbol, short? horizonD, int take, CancellationToken ct);
 
+    // Date-range overload used by application services (aggregate sentiment between dates)
+    Task<IReadOnlyList<Attribution>> GetBySymbolAsync(string symbol, DateOnly from, DateOnly to, CancellationToken ct);
+
     Task<IReadOnlyList<Attribution>> GetForItemAsync(ItemType itemType, long itemId, CancellationToken ct);
 }
