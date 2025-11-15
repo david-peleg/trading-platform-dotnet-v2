@@ -10,7 +10,7 @@ using TradingPlatform.Domain.Attribution;
 // Alias לטיפוס הדומיין כדי למנוע התנגשויות שם
 using DomainAttribution = TradingPlatform.Domain.Attribution.Attribution;
 
-namespace TradingPlatform.Infrastructure.Attributions;
+namespace TradingPlatform.Application.Attribution;
 
 /// <summary>
 /// Heuristic linker (match ticker-like tokens + simple sentiment) and persist via repository (SP-only).
@@ -63,7 +63,7 @@ public sealed class AttributionService : IAttributionService
         _ => 7
     };
 
-    private List<DomainAttribution> Compute(ItemType itemType, long itemId, string? text, DateTime _)
+    private List<DomainAttribution> Compute(ItemType itemType, long itemId, string? text, DateTime publishedUtc)
     {
         if (string.IsNullOrWhiteSpace(text)) return new();
 
@@ -83,9 +83,10 @@ public sealed class AttributionService : IAttributionService
         short direction = (short)(pos > neg ? +1 : (neg > pos ? -1 : 0));
         double confidence = Math.Clamp((pos + neg) switch { >= 3 => 0.8, 2 => 0.6, 1 => 0.5, _ => 0.4 }, 0, 1);
         short horizon = PickHorizon(itemType);
+        var dt = DateOnly.FromDateTime(publishedUtc);
 
         return matches
-            .Select(s => new DomainAttribution(itemType, itemId, s, direction, confidence, horizon))
+            .Select(s => new DomainAttribution(itemType, itemId, s, direction, confidence, horizon, dt))
             .ToList();
     }
 }

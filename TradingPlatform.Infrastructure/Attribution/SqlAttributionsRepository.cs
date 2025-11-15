@@ -54,6 +54,21 @@ public sealed class SqlAttributionsRepository : IAttributionsRepository
         return data.Select(Map).ToList();
     }
 
+    // date-range overload
+    public async Task<IReadOnlyList<DomainAttribution>> GetBySymbolAsync(string symbol, DateOnly from, DateOnly to, CancellationToken ct)
+    {
+        var data = await _db.QueryAsync<Row>(
+            "dbo.Attributions_GetBySymbol",
+            new { Symbol = symbol, HorizonD = (short?)null, Take = 1000 },
+            ct);
+
+        // Map CreatedAt to DateOnly and filter by provided range
+        return data
+            .Where(r => DateOnly.FromDateTime(r.CreatedAt) >= from && DateOnly.FromDateTime(r.CreatedAt) <= to)
+            .Select(MapWithCreatedAt)
+            .ToList();
+    }
+
     public async Task<IReadOnlyList<DomainAttribution>> GetForItemAsync(ItemType itemType, long itemId, CancellationToken ct)
     {
         var data = await _db.QueryAsync<Row>(
@@ -61,11 +76,14 @@ public sealed class SqlAttributionsRepository : IAttributionsRepository
             new { ItemType = (byte)itemType, ItemId = itemId },
             ct);
 
-        return data.Select(Map).ToList();
+        return data.Select(MapWithCreatedAt).ToList();
     }
 
     private static DomainAttribution Map(Row r) =>
-        new((ItemType)r.ItemType, r.ItemId, r.Symbol, r.Direction, r.Confidence, r.HorizonD);
+        new((ItemType)r.ItemType, r.ItemId, r.Symbol, r.Direction, r.Confidence, r.HorizonD, DateOnly.FromDateTime(r.CreatedAt));
+
+    private static DomainAttribution MapWithCreatedAt(Row r) =>
+        new((ItemType)r.ItemType, r.ItemId, r.Symbol, r.Direction, r.Confidence, r.HorizonD, DateOnly.FromDateTime(r.CreatedAt));
 
     private sealed class Row
     {
@@ -75,5 +93,6 @@ public sealed class SqlAttributionsRepository : IAttributionsRepository
         public short Direction { get; init; }
         public double Confidence { get; init; }
         public short HorizonD { get; init; }
+        public DateTime CreatedAt { get; init; }
     }
 }
